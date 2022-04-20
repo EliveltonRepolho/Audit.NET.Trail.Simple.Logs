@@ -59,7 +59,8 @@ Audit.Core.Configuration.JsonSettings = new JsonSerializerOptions
 var app = builder.Build();
 app.UseSwaggerUI();
 
-SeedData(app);
+if (args.Length == 1 && args[0].ToLower() == "seeddata")
+    SeedData(app);
 
 //Seed Data
 void SeedData(IHost app)
