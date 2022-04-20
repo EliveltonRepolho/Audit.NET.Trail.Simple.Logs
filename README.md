@@ -3,6 +3,11 @@
 * Start Database
 `docker-compose up -d`
 
+```bash
+$ dotnet --version
+6.0.201
+```
+
 * Create DB Structure
 ```bash
 cd MiniDemo
