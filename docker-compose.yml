@@ -1,0 +1,16 @@
+version: '3'
+services:
+  mssql_data_server:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    ports:
+      - "1433:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - SQL_USER=${SQL_USER:-sa}
+      - SQL_PASSWORD=${SQL_PASSWORD:-M1nh4s3nh@forte}
+      - SA_PASSWORD=${SQL_PASSWORD:-M1nh4s3nh@forte}
+    volumes:
+      - sqlvolume:/var/opt/mssql
+
+volumes:
+  sqlvolume:
