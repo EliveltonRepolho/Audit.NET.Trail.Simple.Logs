@@ -81,7 +81,6 @@ void SetupAudit()
 
     Audit.EntityFramework.Configuration.Setup()
         .ForContext<EmployeeDbContext>(config => config
-            .IncludeEntityObjects()
             .AuditEventType("EF:{context}"))
         .UseOptIn()
         ;
@@ -97,6 +96,8 @@ void SetupAudit()
                 entity.TableName = entry.Table;
                 entity.EventType = ev.EventType.ToString();
                 entity.HostUserName = ev.Environment.UserName;
+
+                return (ev as AuditEventEntityFramework).EntityFrameworkEvent.Success;
             })
             .IgnoreMatchedProperties()
         );
