@@ -1,13 +1,11 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using MiniDemo.Model;
 using Audit.Core;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
+using Audit.EntityFramework;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using MiniDemo.Model;
+using Configuration = Audit.Core.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,59 +18,13 @@ builder.Services.AddDbContext<EmployeeDbContext>(x => x.UseSqlServer(connectionS
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-Audit.EntityFramework.Configuration.Setup()
-    .ForContext<EmployeeDbContext>(config => config
-        .IncludeEntityObjects()
-        .AuditEventType("EF:{context}"))
-    .UseOptIn()
-    ;
-
-Audit.Core.Configuration.Setup()
-    .UseEntityFramework(ef => ef
-        .AuditTypeMapper(t => typeof(AuditTrail))
-        .AuditEntityAction<AuditTrail>((ev, entry, entity) =>
-        {
-            var now = DateTime.UtcNow;
-            
-            if (entry.Entity is AuditEntity auditEntity) {
-                if (entry.Action == "Insert") {
-                    auditEntity.CreatedDate = now;    
-                }
-                auditEntity.ModifiedDate = now;
-            }
-                        
-            entity.JsonData = entry.ToJson();
-            entity.Action = entry.Action.ToString();
-            entity.ModifiedDate = now;
-            entity.TableName = entry.Table;
-            entity.EventType = ev.EventType.ToString();
-            entity.HostUserName = ev.Environment.UserName;
-        })
-        .IgnoreMatchedProperties()
-    );
-            
-Audit.Core.Configuration.JsonSettings = new JsonSerializerOptions
-{
-    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
-};
+SetupAudit();
 
 var app = builder.Build();
 app.UseSwaggerUI();
 
 if (args.Length == 1 && args[0].ToLower() == "seeddata")
     SeedData(app);
-
-//Seed Data
-void SeedData(IHost app)
-{
-    var scopedFactory = app.Services.GetService<IServiceScopeFactory>();
-
-    using (var scope = scopedFactory.CreateScope())
-    {
-        var service = scope.ServiceProvider.GetService<DataSeeder>();
-        service.Seed();
-    }
-}
 
 if (app.Environment.IsDevelopment())
 {
@@ -103,3 +55,66 @@ app.MapPost("/employee", ([FromServices] IDataRepository db, Employee employee) 
 });
 
 app.Run();
+
+
+void SetupAudit()
+{
+    Configuration.AddCustomAction(ActionType.OnScopeCreated, scope =>
+    {
+        var efEvent = scope.GetEntityFrameworkEvent();
+        foreach (var entry in efEvent.Entries)
+        {
+            if (entry.GetEntry().Entity is not AuditEntity auditEntity)
+                continue;
+
+            var now = DateTime.UtcNow;
+            if (entry.Action == "Insert")
+            {
+                auditEntity.CreatedDate = now;
+            }
+            else
+            {
+                auditEntity.ModifiedDate = now;   
+            }
+        }
+    });
+
+    Audit.EntityFramework.Configuration.Setup()
+        .ForContext<EmployeeDbContext>(config => config
+            .IncludeEntityObjects()
+            .AuditEventType("EF:{context}"))
+        .UseOptIn()
+        ;
+
+    Configuration.Setup()
+        .UseEntityFramework(ef => ef
+            .AuditTypeMapper(t => typeof(AuditTrail))
+            .AuditEntityAction<AuditTrail>((ev, entry, entity) =>
+            {
+                entity.JsonData = entry.ToJson();
+                entity.Action = entry.Action.ToString();
+                entity.ModifiedDate = DateTime.UtcNow;
+                entity.TableName = entry.Table;
+                entity.EventType = ev.EventType.ToString();
+                entity.HostUserName = ev.Environment.UserName;
+            })
+            .IgnoreMatchedProperties()
+        );
+
+    Configuration.JsonSettings = new JsonSerializerOptions
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
+    };
+}
+
+//Seed Data
+void SeedData(IHost app)
+{
+    var scopedFactory = app.Services.GetService<IServiceScopeFactory>();
+
+    using (var scope = scopedFactory.CreateScope())
+    {
+        var service = scope.ServiceProvider.GetService<DataSeeder>();
+        service.Seed();
+    }
+}

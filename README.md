@@ -20,9 +20,9 @@ curl -X 'POST' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
   -d '{
-  "employeeId": "1234",
-  "name": "name 1234",
-  "citizenship": "citizenship 1234"
+  "employeeId": "1",
+  "name": "name 1",
+  "citizenship": "citizenship 1"
 }'
 ```
 
