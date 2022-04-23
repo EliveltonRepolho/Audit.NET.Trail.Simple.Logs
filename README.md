@@ -41,6 +41,27 @@ curl -X 'POST' \
   "citizenship": "citizenship 1"
 }'
 ```
+<details>
+  <summary>Output example</summary>
+
+## Heading
+```json
+{
+    "Table": "Employee",
+    "Name": "Employee",
+    "PrimaryKey": {
+        "EmployeeId": "1"
+    },
+    "Action": "Insert",
+    "ColumnValues": {
+        "EmployeeId": "1",
+        "Citizenship": "citizenship 1",
+        "Name": "name 1"
+    },
+    "Valid": true
+}
+```
+</details>
 
 * Updating an employee
 ```bash
@@ -54,6 +75,39 @@ curl -X 'PUT' \
   "citizenship": "citizenship 1"
 }'
 ```
+<details>
+  <summary>Output example</summary>
+
+## Heading
+```json
+{
+  "Table": "Employee",
+  "Name": "Employee",
+  "PrimaryKey": {
+    "EmployeeId": "1"
+  },
+  "Action": "Update",
+  "Changes": [
+    {
+      "ColumnName": "Citizenship",
+      "OriginalValue": "citizenship 1",
+      "NewValue": "citizenship 1"
+    },
+    {
+      "ColumnName": "Name",
+      "OriginalValue": "name 1",
+      "NewValue": "name 1 - new"
+    }
+  ],
+  "ColumnValues": {
+    "EmployeeId": "1",
+    "Citizenship": "citizenship 1",
+    "Name": "name 1 - new"
+  },
+  "Valid": true
+}
+```
+</details>
 
 #### Started project from
 * https://github.com/executeautomation/ASPNETCore_MinimalAPI
