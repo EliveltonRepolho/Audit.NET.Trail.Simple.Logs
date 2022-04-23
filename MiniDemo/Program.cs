@@ -81,8 +81,9 @@ void SetupAudit()
     });
 
     Audit.EntityFramework.Configuration.Setup()
-        .ForContext<EmployeeDbContext>(config => config
-            .AuditEventType("EF:{context}"))
+        .ForContext<AuditableDbContext>(config => config
+            .AuditEventType("EF:{context}")
+        )
         .UseOptIn()
         ;
 
