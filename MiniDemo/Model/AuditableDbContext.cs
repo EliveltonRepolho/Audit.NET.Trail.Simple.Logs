@@ -1,24 +1,28 @@
-﻿using Audit.EntityFramework;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace MiniDemo.Model
 {
-    public class EmployeeDbContext : DbContext
+    public class AuditableDbContext : DbContext
     {
-        public EmployeeDbContext()
+        public AuditableDbContext()
         {
 
         }
 
-        public EmployeeDbContext(DbContextOptions<EmployeeDbContext> options) : base(options)
+        public AuditableDbContext(DbContextOptions<AuditableDbContext> options) : base(options)
         {
         }
 
-        public DbSet<Employee> Employee { get; set; }
+        public DbSet<AuditTrail> AuditTrails { get; set; }
+        
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            //Configure default schema
+            modelBuilder.HasDefaultSchema("audit");
+        }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.AddInterceptors(new AuditSaveChangesInterceptor());
             
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())

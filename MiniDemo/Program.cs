@@ -5,7 +5,6 @@ using Audit.EntityFramework;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MiniDemo.Model;
-using Configuration = Audit.Core.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +13,7 @@ builder.Services.AddTransient<DataSeeder>();
 //Add Repository Pattern
 builder.Services.AddScoped<IDataRepository, DataRepository>();
 builder.Services.AddDbContext<EmployeeDbContext>(x => x.UseSqlServer(connectionString));
+builder.Services.AddDbContext<AuditableDbContext>(x => x.UseSqlServer(connectionString));
 //Add Swagger Support
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -59,7 +59,7 @@ app.Run();
 
 void SetupAudit()
 {
-    Configuration.AddCustomAction(ActionType.OnScopeCreated, scope =>
+    Audit.Core.Configuration.AddCustomAction(ActionType.OnScopeCreated, scope =>
     {
         var efEvent = scope.GetEntityFrameworkEvent();
         foreach (var entry in efEvent.Entries)
@@ -74,6 +74,7 @@ void SetupAudit()
             }
             else
             {
+                entry.GetEntry().Property("CreatedDate").IsModified = false;
                 auditEntity.ModifiedDate = now;   
             }
         }
@@ -85,8 +86,9 @@ void SetupAudit()
         .UseOptIn()
         ;
 
-    Configuration.Setup()
+    Audit.Core.Configuration.Setup()
         .UseEntityFramework(ef => ef
+            .UseDbContext<AuditableDbContext>()
             .AuditTypeMapper(t => typeof(AuditTrail))
             .AuditEntityAction<AuditTrail>((ev, entry, entity) =>
             {
@@ -96,16 +98,14 @@ void SetupAudit()
                 entity.TableName = entry.Table;
                 entity.EventType = ev.EventType.ToString();
                 entity.HostUserName = ev.Environment.UserName;
+                
+                var efe = ev.GetEntityFrameworkEvent();
 
-                return (ev as AuditEventEntityFramework).EntityFrameworkEvent.Success;
+                return efe.Success;
             })
             .IgnoreMatchedProperties()
         );
 
-    Configuration.JsonSettings = new JsonSerializerOptions
-    {
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
-    };
 }
 
 //Seed Data

@@ -11,7 +11,8 @@ $ dotnet --version
 * Create DB Structure
 ```bash
 cd MiniDemo
-dotnet ef database update
+dotnet ef database update --context EmployeeDbContext
+dotnet ef database update --context AuditDbContext
 ```
 
 * Creating an employee

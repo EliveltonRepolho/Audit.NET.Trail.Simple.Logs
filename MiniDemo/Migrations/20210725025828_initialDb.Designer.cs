@@ -21,20 +21,20 @@ namespace MiniDemo.Migrations
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("MiniDemo.Model.Employee", b =>
-                {
-                    b.Property<string>("EmployeeId")
-                        .HasColumnType("nvarchar(450)");
+            {
+                b.Property<string>("EmployeeId")
+                    .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("Citizenship")
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Citizenship")
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Name")
+                    .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("EmployeeId");
+                b.HasKey("EmployeeId");
 
-                    b.ToTable("Employee");
-                });
+                b.ToTable("Employee");
+            });
 #pragma warning restore 612, 618
         }
     }

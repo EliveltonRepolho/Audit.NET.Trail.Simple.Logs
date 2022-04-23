@@ -9,16 +9,17 @@ using MiniDemo.Model;
 
 #nullable disable
 
-namespace MiniDemo.Migrations
+namespace MiniDemo.Migrations.AuditDb
 {
-    [DbContext(typeof(EmployeeDbContext))]
-    [Migration("20220420213910_audit")]
+    [DbContext(typeof(AuditableDbContext))]
+    [Migration("20220423144421_audit")]
     partial class audit
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasDefaultSchema("audit")
                 .HasAnnotation("ProductVersion", "6.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
@@ -55,31 +56,7 @@ namespace MiniDemo.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AuditTrails");
-                });
-
-            modelBuilder.Entity("MiniDemo.Model.Employee", b =>
-                {
-                    b.Property<string>("EmployeeId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Citizenship")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("EmployeeId");
-
-                    b.ToTable("Employee");
+                    b.ToTable("AuditTrails", "audit");
                 });
 #pragma warning restore 612, 618
         }
