@@ -26,7 +26,7 @@ $ dotnet --version
 ```bash
 cd MiniDemo
 dotnet ef database update --context EmployeeDbContext
-dotnet ef database update --context AuditDbContext
+dotnet ef database update --context AuditableDbContext
 ```
 
 * Creating an employee
