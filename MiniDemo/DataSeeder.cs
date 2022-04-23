@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-namespace MiniDemo.Model
+﻿namespace MiniDemo.Model
 {
     public class DataSeeder
     {

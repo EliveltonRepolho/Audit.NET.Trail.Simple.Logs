@@ -18,9 +18,20 @@ namespace MiniDemo.Model
 
         public Employee PutEmployee(Employee employee)
         {
-            db.Employee.Update(employee);
+            
+            var existing = GetEmployeeById(employee.EmployeeId);
+
+            if (existing == null) {
+                throw new Exception("EmployeeId not found");
+            }
+
+            existing.Citizenship = employee.Citizenship;
+            existing.Name = employee.Name;
+
+            db.Employee.Update(existing);
             db.SaveChanges();
-            return db.Employee.Where(x => x.EmployeeId == employee.EmployeeId).FirstOrDefault();
+            
+            return GetEmployeeById(employee.EmployeeId);
         }
 
         public List<Employee> AddEmployee(Employee employee)
